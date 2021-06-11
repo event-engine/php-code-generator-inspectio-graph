@@ -17,13 +17,11 @@ interface VertexType
     public const TYPE_COMMAND = 'command';
     public const TYPE_DOCUMENT = 'document';
     public const TYPE_POLICY = 'policy';
+    public const TYPE_EXTERNAL_SYSTEM = 'external_system';
+    public const TYPE_HOT_SPOT = 'hot_spot';
     public const TYPE_UI = 'ui';
     public const TYPE_FEATURE = 'feature';
     public const TYPE_BOUNDED_CONTEXT = 'boundedContext';
-
-    public const ATTRIBUTE_LABEL = 'label';
-    public const ATTRIBUTE_TYPE = 'type';
-    public const ATTRIBUTE_METADATA = 'metadata';
 
     public function id(): string;
 

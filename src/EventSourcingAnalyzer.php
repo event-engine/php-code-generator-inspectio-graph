@@ -16,5 +16,19 @@ interface EventSourcingAnalyzer
 
     public function eventMap(): VertexMap;
 
-    public function aggregateMap(): AggregateConnectionMap;
+    public function aggregateMap(): VertexMap;
+
+    public function documentMap(): VertexMap;
+
+    public function externalSystemMap(): VertexMap;
+
+    public function hotSpotMap(): VertexMap;
+
+    public function policyMap(): VertexMap;
+
+    public function uiMap(): VertexMap;
+
+    public function featureMap(): VertexMap;
+
+    public function boundedContextMap(): VertexMap;
 }

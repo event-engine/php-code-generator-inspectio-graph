@@ -8,11 +8,17 @@
 
 declare(strict_types=1);
 
-namespace EventEngine\InspectioGraph;
+namespace EventEngine\InspectioGraph\Connection;
 
+use EventEngine\InspectioGraph\AggregateType;
+use EventEngine\InspectioGraph\CommandType;
+use EventEngine\InspectioGraph\DocumentType;
+use EventEngine\InspectioGraph\EventType;
+use EventEngine\InspectioGraph\Exception\ConnectionMergeNotPossible;
+use EventEngine\InspectioGraph\VertexMap;
 use SplObjectStorage;
 
-final class AggregateConnection
+final class AggregateConnection implements Connection
 {
     /**
      * @var AggregateType
@@ -30,6 +36,11 @@ final class AggregateConnection
     private $eventMap;
 
     /**
+     * @var VertexMap
+     */
+    private $documentMap;
+
+    /**
      * @var string[][]
      */
     private $commandToEventList = [];
@@ -39,15 +50,14 @@ final class AggregateConnection
         $this->aggregate = $aggregate;
         $this->commandMap = VertexMap::emptyMap();
         $this->eventMap = VertexMap::emptyMap();
+        $this->documentMap = VertexMap::emptyMap();
     }
 
     public function withCommands(CommandType ...$commands): self
     {
         $self = clone $this;
 
-        foreach ($commands as $command) {
-            $self->commandMap = $self->commandMap->with($command);
-        }
+        $self->commandMap = $self->commandMap->with(...$commands);
 
         return $self;
     }
@@ -56,9 +66,16 @@ final class AggregateConnection
     {
         $self = clone $this;
 
-        foreach ($events as $event) {
-            $self->eventMap = $self->eventMap->with($event);
-        }
+        $self->eventMap = $self->eventMap->with(...$events);
+
+        return $self;
+    }
+
+    public function withDocuments(DocumentType ...$documents): self
+    {
+        $self = clone $this;
+
+        $self->documentMap = $self->documentMap->with(...$documents);
 
         return $self;
     }
@@ -74,10 +91,40 @@ final class AggregateConnection
                 $self->commandToEventList[$command->name()] = [];
             }
 
-            $self->commandToEventList[$command->name()][] = $event->name();
+            if (! \in_array($event->name(), $self->commandToEventList[$command->name()], true)) {
+                $self->commandToEventList[$command->name()][] = $event->name();
+            }
         }
 
         $self->commandMap = $self->commandMap->with($command);
+
+        return $self;
+    }
+
+    public function merge(Connection $connection, bool $onlyConnectionVertex): self
+    {
+        if (! $connection instanceof self) {
+            throw ConnectionMergeNotPossible::notPossibleFor($this, $connection);
+        }
+
+        $self = clone $this;
+
+        $self->aggregate = $connection->aggregate;
+
+        if ($onlyConnectionVertex === false) {
+            /** @phpstan-ignore-next-line */
+            $self = $self->withCommands(...$connection->commandMap->vertices());
+            /** @phpstan-ignore-next-line */
+            $self = $self->withEvents(...$connection->eventMap->vertices());
+            /** @phpstan-ignore-next-line */
+            $self = $self->withDocuments(...$connection->documentMap->vertices());
+
+            $commandsToEventsMap = $connection->commandsToEventsMap();
+
+            foreach ($commandsToEventsMap as $command) {
+                $self = $self->withCommandEvents($command, ...$commandsToEventsMap[$command]);
+            }
+        }
 
         return $self;
     }
@@ -95,6 +142,11 @@ final class AggregateConnection
     public function eventMap(): VertexMap
     {
         return $this->eventMap;
+    }
+
+    public function documentMap(): VertexMap
+    {
+        return $this->documentMap;
     }
 
     /**
@@ -116,5 +168,15 @@ final class AggregateConnection
         }
 
         return $map;
+    }
+
+    public function id(): string
+    {
+        return $this->aggregate->id();
+    }
+
+    public function name(): string
+    {
+        return $this->aggregate->name();
     }
 }

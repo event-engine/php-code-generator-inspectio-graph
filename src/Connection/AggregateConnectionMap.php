@@ -8,17 +8,19 @@
 
 declare(strict_types=1);
 
-namespace EventEngine\InspectioGraph;
+namespace EventEngine\InspectioGraph\Connection;
 
-use Iterator;
+use EventEngine\InspectioGraph\AggregateType;
+use EventEngine\InspectioGraph\CommandType;
+use EventEngine\InspectioGraph\DocumentType;
+use EventEngine\InspectioGraph\EventType;
+use EventEngine\InspectioGraph\VertexMap;
 
-final class AggregateConnectionMap implements Iterator, \Countable
+/**
+ * @property AggregateConnection[] $map
+ */
+final class AggregateConnectionMap extends ConnectionMap
 {
-    /**
-     * @var AggregateConnection[]
-     */
-    private $map;
-
     public static function emptyMap(): AggregateConnectionMap
     {
         return new self();
@@ -29,70 +31,9 @@ final class AggregateConnectionMap implements Iterator, \Countable
         return new self(...$aggregateConnections);
     }
 
-    private function __construct(AggregateConnection ...$aggregateConnections)
+    public function aggregateConnection(string $id): AggregateConnection
     {
-        foreach ($aggregateConnections as $aggregateConnection) {
-            $this->map[$aggregateConnection->aggregate()->name()] = $aggregateConnection;
-        }
-    }
-
-    public function with(string $name, AggregateConnection $aggregateConnection): self
-    {
-        $instance = clone $this;
-        $instance->map[$name] = $aggregateConnection;
-
-        return $instance;
-    }
-
-    public function without(string $name): self
-    {
-        $instance = clone $this;
-        unset($instance->map[$name]);
-
-        return $instance;
-    }
-
-    public function has(string $name): bool
-    {
-        return isset($this->map[$name]);
-    }
-
-    public function aggregateConnection(string $name): AggregateConnection
-    {
-        return $this->map[$name];
-    }
-
-    public function count(): int
-    {
-        return \count($this->map);
-    }
-
-    public function rewind(): void
-    {
-        \reset($this->map);
-    }
-
-    public function key(): string
-    {
-        return \key($this->map);
-    }
-
-    public function next(): void
-    {
-        \next($this->map);
-    }
-
-    public function valid(): bool
-    {
-        return false !== \current($this->map);
-    }
-
-    /**
-     * @return AggregateConnection
-     */
-    public function current()
-    {
-        return \current($this->map);
+        return $this->map[$id];
     }
 
     public function aggregateVertexMap(): VertexMap
@@ -124,6 +65,17 @@ final class AggregateConnectionMap implements Iterator, \Countable
     {
         foreach ($this->map as $aggregateConnection) {
             if ($aggregateConnection->eventMap()->has($event->name())) {
+                return $aggregateConnection->aggregate();
+            }
+        }
+
+        return null;
+    }
+
+    public function aggregateByDocument(DocumentType $document): ?AggregateType
+    {
+        foreach ($this->map as $aggregateConnection) {
+            if ($aggregateConnection->documentMap()->has($document->name())) {
                 return $aggregateConnection->aggregate();
             }
         }

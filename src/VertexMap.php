@@ -45,21 +45,24 @@ final class VertexMap implements Iterator, \Countable
         }
     }
 
-    public function with(VertexType $vertex): self
+    public function with(VertexType ...$vertexes): self
     {
-        $name = $vertex->name();
-
-        if (isset($this->vertices[$name])
-            && $this->vertices[$name]->type() !== $vertex->type()
-        ) {
-            throw new RuntimeException(
-                \sprintf('Vertex with same name "%s" and different types detected.', $vertex->name())
-            );
-        }
-
         $instance = clone $this;
 
-        $instance->vertices[$name] = $vertex;
+        foreach ($vertexes as $vertex) {
+            $name = $vertex->name();
+
+            if (isset($this->vertices[$name])
+                && $this->vertices[$name]->type() !== $vertex->type()
+            ) {
+                throw new RuntimeException(
+                    \sprintf('Vertex with same name "%s" and different types detected.', $vertex->name())
+                );
+            }
+
+            $instance->vertices[$name] = $vertex;
+        }
+        \reset($instance->vertices);
 
         return $instance;
     }
@@ -80,6 +83,14 @@ final class VertexMap implements Iterator, \Countable
     public function vertex(string $name): VertexType
     {
         return $this->vertices[$name];
+    }
+
+    /**
+     * @return VertexType[]
+     */
+    public function vertices(): array
+    {
+        return \array_values($this->vertices);
     }
 
     public function count(): int
