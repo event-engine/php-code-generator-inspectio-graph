@@ -10,25 +10,82 @@ declare(strict_types=1);
 
 namespace EventEngine\InspectioGraph;
 
-interface EventSourcingAnalyzer
+interface EventSourcingAnalyzer extends CanAccessVertexConnection
 {
-    public function commandMap(): VertexMap;
+    /**
+     * Returns all command connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function commandMap(): VertexConnectionMap;
 
-    public function eventMap(): VertexMap;
+    /**
+     * Returns all event connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function eventMap(): VertexConnectionMap;
 
-    public function aggregateMap(): VertexMap;
+    /**
+     * Returns all aggregate connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function aggregateMap(): VertexConnectionMap;
 
-    public function documentMap(): VertexMap;
+    /**
+     * Returns all document connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function documentMap(): VertexConnectionMap;
 
-    public function externalSystemMap(): VertexMap;
+    /**
+     * Returns all external system connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function externalSystemMap(): VertexConnectionMap;
 
-    public function hotSpotMap(): VertexMap;
+    /**
+     * Returns all hot spot connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function hotSpotMap(): VertexConnectionMap;
 
-    public function policyMap(): VertexMap;
+    /**
+     * Returns all policy connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function policyMap(): VertexConnectionMap;
 
-    public function uiMap(): VertexMap;
+    /**
+     * Returns all ui connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function uiMap(): VertexConnectionMap;
 
-    public function featureMap(): VertexMap;
+    /**
+     * Returns all feature connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function featureMap(): VertexConnectionMap;
 
-    public function boundedContextMap(): VertexMap;
+    /**
+     * Returns all bounded context connections
+     *
+     * @return VertexConnectionMap
+     */
+    public function boundedContextMap(): VertexConnectionMap;
+
+    /**
+     * Returns whole graph with all connections. Can be used for searching of vertices or lookup of connections.
+     *
+     * @return VertexConnectionMap
+     */
+    public function graph(): VertexConnectionMap;
 }

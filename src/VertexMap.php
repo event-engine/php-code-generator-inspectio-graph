@@ -10,15 +10,14 @@ declare(strict_types=1);
 
 namespace EventEngine\InspectioGraph;
 
-use EventEngine\InspectioGraph\Exception\RuntimeException;
 use Iterator;
 
 final class VertexMap implements Iterator, \Countable
 {
     /**
-     * @var VertexType[]
+     * @var array<string, VertexType>
      */
-    private $vertices = [];
+    private array $vertices = [];
 
     public static function emptyMap(): VertexMap
     {
@@ -33,15 +32,7 @@ final class VertexMap implements Iterator, \Countable
     private function __construct(VertexType ...$vertices)
     {
         foreach ($vertices as $vertex) {
-            if (isset($this->vertices[$vertex->name()])
-                && $this->vertices[$vertex->name()]->type() !== $vertex->type()
-            ) {
-                throw new RuntimeException(
-                    \sprintf('Vertex with same name "%s" and different types detected.', $vertex->name())
-                );
-            }
-
-            $this->vertices[$vertex->name()] = $vertex;
+            $this->vertices[$vertex->id()] = $vertex;
         }
     }
 
@@ -50,39 +41,32 @@ final class VertexMap implements Iterator, \Countable
         $instance = clone $this;
 
         foreach ($vertexes as $vertex) {
-            $name = $vertex->name();
-
-            if (isset($this->vertices[$name])
-                && $this->vertices[$name]->type() !== $vertex->type()
-            ) {
-                throw new RuntimeException(
-                    \sprintf('Vertex with same name "%s" and different types detected.', $vertex->name())
-                );
-            }
-
-            $instance->vertices[$name] = $vertex;
+            $instance->vertices[$vertex->id()] = $vertex;
         }
         \reset($instance->vertices);
 
         return $instance;
     }
 
-    public function without(string $name): self
+    public function without(string $id): self
     {
         $instance = clone $this;
-        unset($instance->vertices[$name]);
+        unset($instance->vertices[$id]);
+        \reset($instance->vertices);
 
         return $instance;
     }
 
-    public function has(string $name): bool
+    public function filterByType(string $type): self
     {
-        return isset($this->vertices[$name]);
-    }
+        $instance = clone $this;
+        $instance->vertices = \array_filter(
+            $instance->vertices,
+            static fn (VertexType $vertex) => $vertex->type() === $type
+        );
+        \reset($instance->vertices);
 
-    public function vertex(string $name): VertexType
-    {
-        return $this->vertices[$name];
+        return $instance;
     }
 
     /**
@@ -91,6 +75,11 @@ final class VertexMap implements Iterator, \Countable
     public function vertices(): array
     {
         return \array_values($this->vertices);
+    }
+
+    public function has(string $id): bool
+    {
+        return isset($this->vertices[$id]);
     }
 
     public function count(): int

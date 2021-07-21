@@ -8,9 +8,8 @@
 
 declare(strict_types=1);
 
-namespace EventEngine\InspectioGraph\Connection;
+namespace EventEngine\InspectioGraph;
 
-interface AggregateConnectionAnalyzer
+interface RoleType extends VertexType
 {
-    public function aggregateConnectionMap(): AggregateConnectionMap;
 }

@@ -30,7 +30,7 @@
         }
     },
     "require": {
-        "php": "^7.3 || ^8.0"
+        "php": "^7.4 || ^8.0"
     },
     "require-dev": {
         "phpspec/prophecy-phpunit": "^2.0",
@@ -48,8 +48,8 @@
             "@test",
             "@analyse"
         ],
-        "cs": "php-cs-fixer fix src -v --diff --dry-run",
-        "cs-fix": "php-cs-fixer fix src -v --diff",
+        "cs": "php-cs-fixer fix -v --diff --dry-run",
+        "cs-fix": "php-cs-fixer fix -v --diff",
         "test": "vendor/bin/phpunit",
         "analyse": "php vendor/bin/phpstan.phar analyse --no-interaction"
     },

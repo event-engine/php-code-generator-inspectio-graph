@@ -8,12 +8,11 @@
 
 declare(strict_types=1);
 
-namespace EventEngine\InspectioGraph\Metadata;
+namespace EventEngine\InspectioGraph;
 
-/**
- * @deprecated Use Has* interfaces instead
- */
-interface AggregateMetadata extends Metadata
+interface CanAccessVertexConnection
 {
-    public function schema(): ?string;
+    public function has(string $id): bool;
+
+    public function connection(string $id): VertexConnection;
 }
